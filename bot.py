@@ -1,44 +1,31 @@
-import logging
-import json
-import os
+import discord
+from discord.ext import commands
 
-# Configure logging
-def configure_logging():
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler('bot.log'),
-            logging.StreamHandler()
-        ]
-    )
+# Define the bot intents
+intents = discord.Intents.default()
+intents.messages = True
 
-# Load configuration
-def load_config(config_path):
-    if not os.path.exists(config_path):
-        logging.error("Configuration file not found!")
-        return None
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    logging.info("Configuration loaded successfully.")
-    return config
+# Create a bot instance
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Utility commands
-def utility_command_1():
-    logging.info("Utility command 1 executed.")
-    return "Result of command 1"
+@bot.event
+def on_ready():
+    print(f'Logged in as {bot.user.name} (ID: {bot.user.id})')
+    print('------')
 
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
 
-def utility_command_2():
-    logging.info("Utility command 2 executed.")
-    return "Result of command 2"
+    # Respond to a specific command without a command decorator
+    if message.content.startswith('!hello'):
+        await message.channel.send('Hello! I am your Discord bot.')
 
-if __name__ == '__main__':
-    configure_logging()
-    config = load_config('config.json')
-    if config:
-        # Execute utility commands based on config or user input
-        result1 = utility_command_1()
-        result2 = utility_command_2()
-        logging.info(f'Result 1: {result1}')
-        logging.info(f'Result 2: {result2}')
+@bot.command()
+async def ping(ctx):
+    await ctx.send('Pong!')
+
+# Run the bot with your token
+TOKEN = 'YOUR_TOKEN_HERE'
+bot.run(TOKEN)
